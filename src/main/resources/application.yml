@@ -1,0 +1,85 @@
+## server
+server:
+  port: 8080
+  tomcat:
+    mbeanregistry:
+      enabled: on
+
+## management
+management:
+  info:
+    java:
+      enabled: on
+    os:
+      enabled: on
+    env:
+      enabled: on
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+## spring
+spring:
+  application:
+    name: finance-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${database_host}/${database_name}
+    username: ${database_username}
+    password: ${database_password}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${issuer_host}
+
+# eureka
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
+
+
+## bob core
+bob-core:
+  enabled: on
+  jpa:
+    enabled: on
+
+
+## logging
+logging:
+  charset:
+    console: UTF-8
+    file: UTF-8
+  file:
+    name: ${logs_path}/${spring.application.name}.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:%-5p} ${PID} --- [%15.15t] %-40.40logger{39} :%06L : %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:%-5p} ${PID} --- [%15.15t] %-40.40logger{39} :%06L : %m%n"
+  logback:
+    rollingpolicy:
+      file-name-pattern: "${logs_path}/%d{yyyy-MM-dd}/${spring.application.name}.%d{yyyy-MM-dd}.%i.log"
+      max-file-size: 10MB
+      max-history: ${log_max_history:10}
+  level:
+    root: info
+    web: info
+    org.bobpark: info
