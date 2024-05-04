@@ -26,6 +26,10 @@ management:
 spring:
   application:
     name: finance-service
+  mvc:
+    format:
+      date: iso
+      date-time: iso
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${database_host}/${database_name}
