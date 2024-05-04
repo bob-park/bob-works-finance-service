@@ -38,7 +38,12 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 100
-
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            logger-level: basic
   security:
     oauth2:
       resourceserver:
