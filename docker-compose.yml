@@ -1,0 +1,12 @@
+services:
+  bob-works-finance-service:
+    container_name: bob-works-finance-service
+    image: ghcr.io/bob-park/bob-works-finance-service
+    privileged: true
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
