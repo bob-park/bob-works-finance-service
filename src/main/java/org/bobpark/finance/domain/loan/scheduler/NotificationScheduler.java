@@ -2,6 +2,7 @@ package org.bobpark.finance.domain.loan.scheduler;
 
 import static org.apache.commons.lang3.ObjectUtils.*;
 
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.apache.commons.lang3.StringUtils;
 
 import org.bobpark.finance.common.auth.BobWorksAuthenticationContextHolder;
-import org.bobpark.finance.common.entity.BaseTimeEntity;
 import org.bobpark.finance.configure.oauth2.propreties.BobWorksOAuth2Properties;
 import org.bobpark.finance.domain.auth.feign.client.BobWorksOAuth2FeignClient;
 import org.bobpark.finance.domain.auth.feign.model.AuthTokenRequest;
@@ -36,7 +35,7 @@ import org.bobpark.finance.domain.user.feign.model.UserResponse;
 @Transactional(readOnly = true)
 public class NotificationScheduler {
 
-    private static final String MESSAGE_USER_NOTIFICATION = "%s님 금일(%d-%02d-%02d) \"%s\" 대출 원금 및 이자 상환일입니다. \n\n\t원금: \t*%d*\n\t이자: \t*%d*\n\t납부 총액: \t*%d*";
+    private static final String MESSAGE_USER_NOTIFICATION = "%s님 금일(%d-%02d-%02d) \"%s\" 대출 원금 및 이자 상환일입니다. \n\n\t원금: \t*%s원*\n\t이자: \t*%s원*\n\t납부 총액: \t*%s원*";
 
     private final BobWorksOAuth2Properties properties;
 
@@ -152,9 +151,9 @@ public class NotificationScheduler {
             repaymentDate.getMonthValue(),
             repaymentDate.getDayOfMonth(),
             repayment.getLoan().getName(),
-            repayment.getPrincipal(),
-            repayment.getInterest(),
-            repayment.getPrincipal() + repayment.getInterest());
+            MessageFormat.format("{0}", repayment.getPrincipal()),
+            MessageFormat.format("{0}", repayment.getInterest()),
+            MessageFormat.format("{0}", repayment.getPrincipal() + repayment.getInterest()));
     }
 
 }
