@@ -8,7 +8,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -66,7 +65,7 @@ public class Loan extends BaseEntity {
     private Long defaultRepaymentBalance;
 
     @Exclude
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "loan")
     private List<LoanRepaymentHistory> repaymentHistories = new ArrayList<>();
 
     @Builder

@@ -23,6 +23,7 @@ import org.bobpark.finance.domain.auth.feign.model.AuthTokenRequest;
 import org.bobpark.finance.domain.auth.feign.model.AuthTokenResponse;
 import org.bobpark.finance.domain.loan.entity.Loan;
 import org.bobpark.finance.domain.loan.entity.LoanRepaymentHistory;
+import org.bobpark.finance.domain.loan.repository.LoanRepaymentHistoryRepository;
 import org.bobpark.finance.domain.loan.repository.LoanRepository;
 import org.bobpark.finance.domain.loan.type.RepaymentType;
 import org.bobpark.finance.domain.user.feign.client.UserFeignClient;
@@ -35,7 +36,7 @@ import org.bobpark.finance.domain.user.feign.model.UserResponse;
 @Transactional(readOnly = true)
 public class NotificationScheduler {
 
-    private static final String MESSAGE_USER_NOTIFICATION = "%s님 금일(%d-%02d-%02d) \"%s\" 대출 원금 및 이자 상환일입니다. \n\n\t원금: \t*%s원*\n\t이자: \t*%s원*\n\t납부 총액: \t*%s원*";
+    private static final String MESSAGE_USER_NOTIFICATION = "%s님 금일(%d-%02d-%02d) \"%s\" 대출 원금 및 이자 상환일입니다. \n\n\t대출 상환 아이디:\t %d\n\t원금: \t*%s원*\n\t이자: \t*%s원*\n\t납부 총액: \t*%s원*";
 
     private final BobWorksOAuth2Properties properties;
 
@@ -43,6 +44,7 @@ public class NotificationScheduler {
     private final UserFeignClient userClient;
 
     private final LoanRepository loanRepository;
+    private final LoanRepaymentHistoryRepository repaymentRepository;
 
     @Scheduled(cron = "${bob-works.cron-change-status:0 10 0 * * *}")
     public void changeStatus() {
@@ -97,13 +99,15 @@ public class NotificationScheduler {
                     .map(LoanRepaymentHistory::getRepaymentDate)
                     .orElse(loan.getStartDate());
 
-            LoanRepaymentHistory repayment = loan.createRepayment(defaultPaymentBalance, now, prevRepaymentDate);
+            LoanRepaymentHistory createdRepayment = loan.createRepayment(defaultPaymentBalance, now, prevRepaymentDate);
+
+            createdRepayment = repaymentRepository.save(createdRepayment);
 
             userClient.sendNotification(
                 user.id(),
                 SendUserNotificationRequest.builder()
                     .message(
-                        generateMessage(repayment, user, repaymentDate))
+                        generateMessage(createdRepayment, user, repaymentDate))
                     .build());
 
         }
@@ -151,6 +155,7 @@ public class NotificationScheduler {
             repaymentDate.getMonthValue(),
             repaymentDate.getDayOfMonth(),
             repayment.getLoan().getName(),
+            repayment.getId(),
             MessageFormat.format("{0}", repayment.getPrincipal()),
             MessageFormat.format("{0}", repayment.getInterest()),
             MessageFormat.format("{0}", repayment.getPrincipal() + repayment.getInterest()));

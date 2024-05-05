@@ -31,7 +31,7 @@ class LoanTest {
         LocalDate now = LocalDate.of(2024, 4, 1);
         LocalDate prevDate = LocalDate.of(2024, 3, 1);
 
-        loan.repay(0, now, prevDate);
+        loan.createRepayment(0, now, prevDate);
 
         System.out.println(loan.getRepaymentHistories().get(0).getInterest());
     }
