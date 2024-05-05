@@ -34,6 +34,7 @@ public class LoanQueryRepositoryImpl implements LoanQueryRepository {
                 loan.status.eq(LoanStatus.PROCEEDING),
                 loan.startDate.loe(LocalDate.now()),
                 loan.endDate.goe(LocalDate.now()))
+            .orderBy(loan.startDate.asc())
             .fetch();
     }
 }
