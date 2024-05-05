@@ -40,8 +40,10 @@ public class LoanRepaymentHistory extends BaseTimeEntity {
     private Long principal;
     private Long interest;
 
+    private Integer round;
+
     @Builder
-    private LoanRepaymentHistory(Long id, Long principal, Long interest) {
+    private LoanRepaymentHistory(Long id, Long principal, Long interest, Integer round) {
 
         checkArgument(isNotEmpty(principal), "principal must be provided.");
         checkArgument(isNotEmpty(interest), "interest must be provided.");
@@ -49,6 +51,7 @@ public class LoanRepaymentHistory extends BaseTimeEntity {
         this.id = id;
         this.principal = principal;
         this.interest = interest;
+        this.round = defaultIfNull(round, 1);
     }
 
     /*

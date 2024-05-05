@@ -9,7 +9,7 @@ import org.bobpark.finance.domain.loan.type.RepaymentType;
 class LoanTest {
 
     @Test
-    void repayment() {
+    void repay() {
 
         Loan loan =
             Loan.builder()
@@ -31,7 +31,7 @@ class LoanTest {
         LocalDate now = LocalDate.of(2024, 4, 1);
         LocalDate prevDate = LocalDate.of(2024, 3, 1);
 
-        loan.repayment(0, now, prevDate);
+        loan.repay(0, now, prevDate);
 
         System.out.println(loan.getRepaymentHistories().get(0).getInterest());
     }

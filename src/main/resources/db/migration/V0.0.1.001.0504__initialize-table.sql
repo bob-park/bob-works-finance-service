@@ -27,6 +27,7 @@ create table loans_repayment_histories
     loan_id            bigint                  not null,
     principal          bigint                  not null,
     interest           bigint                  not null,
+    round              int       default 1     not null,
     created_date       timestamp default now() not null,
     last_modified_date timestamp,
 

@@ -94,7 +94,19 @@ public class Loan extends BaseEntity {
         this.endingBalance = defaultIfNull(endingBalance, totalBalance);
     }
 
-    public void repayment(long customPrincipal, LocalDate now, LocalDate prevRepaymentDate) {
+    public void repay(LocalDate now, LocalDate prevRepaymentDate) {
+        repay(0, now, prevRepaymentDate);
+    }
+
+    /**
+     * 대출 상환 메서드
+     *
+     *
+     * @param repayment 상환 급액 - type 이 CUSTOM 인 경우에만 적용
+     * @param now 상환 날짜
+     * @param prevRepaymentDate 이전 상환 날짜
+     */
+    public void repay(long repayment, LocalDate now, LocalDate prevRepaymentDate) {
 
         checkArgument(isNotEmpty(now), "now must be provided.");
         checkArgument(isNotEmpty(prevRepaymentDate), "prevRepaymentDate must be provided.");
@@ -143,21 +155,24 @@ public class Loan extends BaseEntity {
 
             default -> {
                 // custom
-                principal = customPrincipal;
+                interest = Math.round((getEndingBalance() * getInterestRate()) * (days / (double)365));
+                principal = repayment - interest;
             }
         }
 
-        LoanRepaymentHistory repayment =
+        LoanRepaymentHistory repaymentHistory =
             LoanRepaymentHistory.builder()
                 .principal(principal)
                 .interest(interest)
+                .round((int)(getRepaymentCount() + 1))
                 .build();
 
-        repayment.updateLoan(this);
+        repaymentHistory.updateLoan(this);
 
         this.endingBalance -= principal;
+        this.repaymentCount++;
 
-        getRepaymentHistories().add(repayment);
+        getRepaymentHistories().add(repaymentHistory);
 
     }
 
