@@ -3,6 +3,8 @@ package org.bobpark.finance.domain.loan.entity;
 import static com.google.common.base.Preconditions.*;
 import static org.apache.commons.lang3.ObjectUtils.*;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -41,9 +43,12 @@ public class LoanRepaymentHistory extends BaseTimeEntity {
     private Long interest;
 
     private Integer round;
+    private Boolean isRepaid;
+    private LocalDate repaymentDate;
 
     @Builder
-    private LoanRepaymentHistory(Long id, Long principal, Long interest, Integer round) {
+    private LoanRepaymentHistory(Long id, Long principal, Long interest, Integer round, Boolean isRepaid,
+        LocalDate repaymentDate) {
 
         checkArgument(isNotEmpty(principal), "principal must be provided.");
         checkArgument(isNotEmpty(interest), "interest must be provided.");
@@ -52,12 +57,22 @@ public class LoanRepaymentHistory extends BaseTimeEntity {
         this.principal = principal;
         this.interest = interest;
         this.round = defaultIfNull(round, 1);
+        this.isRepaid = defaultIfNull(isRepaid, false);
+        this.repaymentDate = repaymentDate;
     }
 
     /*
-        편의 메서드
-         */
+      편의 메서드
+    */
     public void updateLoan(Loan loan) {
         this.loan = loan;
     }
+
+    public void completeRepayment() {
+        getLoan().updateEndingBalance(getLoan().getEndingBalance() - getPrincipal());
+        getLoan().updateRepaymentCount(getLoan().getRepaymentCount() + 1);
+
+        this.repaymentDate = LocalDate.now();
+    }
+
 }

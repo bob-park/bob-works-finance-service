@@ -56,8 +56,9 @@ public class LoanV1Service implements LoanService {
                 .endDate(createV1Request.endDate())
                 .repaymentDate(createV1Request.repaymentDate())
                 .interestRate(createV1Request.interestRate())
-                .repaymentType(createRequest.repaymentType())
-                .totalBalance(createRequest.totalBalance())
+                .repaymentType(createV1Request.repaymentType())
+                .totalBalance(createV1Request.totalBalance())
+                .defaultRepaymentBalance(createV1Request.defaultRepaymentBalance())
                 .build();
 
         createdLoan = loanRepository.save(createdLoan);
@@ -82,7 +83,7 @@ public class LoanV1Service implements LoanService {
         LocalDate prevRepaymentDate =
             loan.getRepaymentHistories().stream()
                 .max(Comparator.comparing(BaseTimeEntity::getCreatedDate))
-                .map(item -> item.getCreatedDate().toLocalDate())
+                .map(item -> item.getRepaymentDate())
                 .orElse(loan.getStartDate());
 
         if (loan.getRepaymentType() == RepaymentType.CUSTOM) {
@@ -90,9 +91,9 @@ public class LoanV1Service implements LoanService {
 
             checkArgument(isNotEmpty(repayV1Request.repayment()), "repayment must be provided.");
 
-            loan.repay(repayV1Request.repayment(), repayRequest.repaymentDate(), prevRepaymentDate);
+            // loan.repay(repayV1Request.repayment(), repayRequest.repaymentDate(), prevRepaymentDate);
         } else {
-            loan.repay(repayV1Request.repaymentDate(), prevRepaymentDate);
+            // loan.repay(repayV1Request.repaymentDate(), prevRepaymentDate);
         }
 
         log.debug("repaid loan... (loanId={})", loan.getId());

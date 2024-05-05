@@ -3,6 +3,7 @@ package org.bobpark.finance.domain.loan.scheduler;
 import static org.apache.commons.lang3.ObjectUtils.*;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.apache.commons.lang3.StringUtils;
 
 import org.bobpark.finance.common.auth.BobWorksAuthenticationContextHolder;
+import org.bobpark.finance.common.entity.BaseTimeEntity;
 import org.bobpark.finance.configure.oauth2.propreties.BobWorksOAuth2Properties;
 import org.bobpark.finance.domain.auth.feign.client.BobWorksOAuth2FeignClient;
 import org.bobpark.finance.domain.auth.feign.model.AuthTokenRequest;
 import org.bobpark.finance.domain.auth.feign.model.AuthTokenResponse;
 import org.bobpark.finance.domain.loan.entity.Loan;
+import org.bobpark.finance.domain.loan.entity.LoanRepaymentHistory;
 import org.bobpark.finance.domain.loan.repository.LoanRepository;
+import org.bobpark.finance.domain.loan.type.RepaymentType;
 import org.bobpark.finance.domain.user.feign.client.UserFeignClient;
 import org.bobpark.finance.domain.user.feign.model.SendUserNotificationRequest;
 import org.bobpark.finance.domain.user.feign.model.UserResponse;
@@ -32,7 +36,7 @@ import org.bobpark.finance.domain.user.feign.model.UserResponse;
 @Transactional(readOnly = true)
 public class NotificationScheduler {
 
-    private static final String MESSAGE_USER_NOTIFICATION = "%s님 금일(%d-%02d-%02d) \"%s\" 대출 원금 및 이자 상환일입니다.";
+    private static final String MESSAGE_USER_NOTIFICATION = "%s님 금일(%d-%02d-%02d) \"%s\" 대출 원금 및 이자 상환일입니다. \n\n\t원금: \t*%d*\n\t이자: \t*%d*\n\t납부 총액: \t*%d*";
 
     private final BobWorksOAuth2Properties properties;
 
@@ -46,6 +50,7 @@ public class NotificationScheduler {
         // loanRepository.
     }
 
+    @Transactional
     @Scheduled(cron = "${bob-works.cron-send-notification:0 0 9 * * *}")
     public void sendNotification() {
 
@@ -82,17 +87,24 @@ public class NotificationScheduler {
                 continue;
             }
 
+            // 납부 금액 생성
+            long defaultPaymentBalance =
+                loan.getRepaymentType() == RepaymentType.CUSTOM ? loan.getDefaultRepaymentBalance() : 0;
+
+            LocalDate prevRepaymentDate =
+                loan.getRepaymentHistories().stream()
+                    .filter(LoanRepaymentHistory::getIsRepaid)
+                    .max(Comparator.comparing(LoanRepaymentHistory::getRepaymentDate))
+                    .map(LoanRepaymentHistory::getRepaymentDate)
+                    .orElse(loan.getStartDate());
+
+            LoanRepaymentHistory repayment = loan.createRepayment(defaultPaymentBalance, now, prevRepaymentDate);
+
             userClient.sendNotification(
                 user.id(),
                 SendUserNotificationRequest.builder()
                     .message(
-                        String.format(
-                            MESSAGE_USER_NOTIFICATION,
-                            user.name(),
-                            now.getYear(),
-                            now.getMonthValue(),
-                            now.getDayOfMonth(),
-                            loan.getName()))
+                        generateMessage(repayment, user, repaymentDate))
                     .build());
 
         }
@@ -129,6 +141,20 @@ public class NotificationScheduler {
             .filter(user -> user.id().equals(userId))
             .findAny()
             .orElse(null);
+    }
+
+    private String generateMessage(LoanRepaymentHistory repayment, UserResponse user, LocalDate repaymentDate) {
+
+        return String.format(
+            MESSAGE_USER_NOTIFICATION,
+            user.name(),
+            repaymentDate.getYear(),
+            repaymentDate.getMonthValue(),
+            repaymentDate.getDayOfMonth(),
+            repayment.getLoan().getName(),
+            repayment.getPrincipal(),
+            repayment.getInterest(),
+            repayment.getPrincipal() + repayment.getInterest());
     }
 
 }

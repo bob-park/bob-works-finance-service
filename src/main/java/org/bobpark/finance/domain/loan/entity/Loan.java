@@ -63,6 +63,8 @@ public class Loan extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private LoanStatus status;
 
+    private Long defaultRepaymentBalance;
+
     @Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LoanRepaymentHistory> repaymentHistories = new ArrayList<>();
@@ -70,7 +72,7 @@ public class Loan extends BaseEntity {
     @Builder
     private Loan(Long id, Long userId, String name, String description, LocalDate startDate, LocalDate endDate,
         Integer repaymentDate, Double interestRate, RepaymentType repaymentType, Long totalBalance,
-        Long repaymentCount, Long endingBalance, LoanStatus status) {
+        Long repaymentCount, Long endingBalance, LoanStatus status, Long defaultRepaymentBalance) {
 
         checkArgument(isNotEmpty(userId), "userId must be provided.");
         checkArgument(StringUtils.isNotBlank(name), "name must be provided.");
@@ -97,10 +99,7 @@ public class Loan extends BaseEntity {
         this.repaymentCount = defaultIfNull(repaymentCount, 0L);
         this.endingBalance = defaultIfNull(endingBalance, totalBalance);
         this.status = defaultIfNull(status, LoanStatus.PROCEEDING);
-    }
-
-    public void repay(LocalDate now, LocalDate prevRepaymentDate) {
-        repay(0, now, prevRepaymentDate);
+        this.defaultRepaymentBalance = defaultRepaymentBalance;
     }
 
     /**
@@ -110,7 +109,7 @@ public class Loan extends BaseEntity {
      * @param now               상환 날짜
      * @param prevRepaymentDate 이전 상환 날짜
      */
-    public void repay(long repayment, LocalDate now, LocalDate prevRepaymentDate) {
+    public LoanRepaymentHistory createRepayment(long repayment, LocalDate now, LocalDate prevRepaymentDate) {
 
         checkArgument(isNotEmpty(now), "now must be provided.");
         checkArgument(isNotEmpty(prevRepaymentDate), "prevRepaymentDate must be provided.");
@@ -173,11 +172,17 @@ public class Loan extends BaseEntity {
 
         repaymentHistory.updateLoan(this);
 
-        this.endingBalance -= principal;
-        this.repaymentCount++;
-
         getRepaymentHistories().add(repaymentHistory);
 
+        return repaymentHistory;
+    }
+
+    public void updateEndingBalance(long endingBalance) {
+        this.endingBalance = endingBalance;
+    }
+
+    public void updateRepaymentCount(long repaymentCount) {
+        this.repaymentCount = repaymentCount;
     }
 
 }

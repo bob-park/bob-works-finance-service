@@ -1,4 +1,4 @@
-package org.bobpark.finance.jpa;
+package org.bobpark.finance.configure.jpa;
 
 import java.util.Optional;
 
@@ -11,6 +11,10 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
+import org.apache.commons.lang.StringUtils;
+
+import org.bobpark.finance.common.auth.BobWorksAuthenticationContextHolder;
+
 @EnableJpaAuditing
 @Configuration
 public class JpaConfiguration {
@@ -19,14 +23,20 @@ public class JpaConfiguration {
     public AuditorAware<String> auditorAware() {
         return () -> {
 
+            String name = "";
+
             JwtAuthenticationToken authentication = (JwtAuthenticationToken)SecurityContextHolder.getContext()
                 .getAuthentication();
 
-            if (!authentication.isAuthenticated()) {
-                throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
+            if (authentication != null) {
+                name = authentication.getName();
             }
 
-            return Optional.of(authentication.getName());
+            if (StringUtils.isBlank(name)) {
+                name = "system";
+            }
+
+            return Optional.of(name);
         };
     }
 }

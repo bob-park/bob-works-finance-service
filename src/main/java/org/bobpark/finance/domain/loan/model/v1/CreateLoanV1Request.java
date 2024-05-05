@@ -12,6 +12,7 @@ public record CreateLoanV1Request(String name,
                                   Integer repaymentDate,
                                   Double interestRate,
                                   RepaymentType repaymentType,
-                                  Long totalBalance)
+                                  Long totalBalance,
+                                  Long defaultRepaymentBalance)
     implements CreateLoanRequest {
 }
