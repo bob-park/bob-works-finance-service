@@ -31,7 +31,7 @@ create table loans_repayment_histories
     interest           bigint                  not null,
     round              int       default 1     not null,
     is_repaid          bool      default false not null,
-    repayment_date     date,
+    repayment_date     timestamp,
     created_date       timestamp default now() not null,
     last_modified_date timestamp,
 

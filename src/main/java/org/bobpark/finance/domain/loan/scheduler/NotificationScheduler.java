@@ -36,7 +36,7 @@ import org.bobpark.finance.domain.user.feign.model.UserResponse;
 @Transactional(readOnly = true)
 public class NotificationScheduler {
 
-    private static final String MESSAGE_USER_NOTIFICATION = "%s님 금일(%d-%02d-%02d) \"%s\" 대출 원금 및 이자 상환일입니다. \n\n\t대출 상환 아이디:\t %d\n\t원금: \t*%s원*\n\t이자: \t*%s원*\n\t납부 총액: \t*%s원*";
+    private static final String MESSAGE_USER_NOTIFICATION = "%s님 금일(%d-%02d-%02d) \"%s\" 대출 원금 및 이자 상환일입니다. \n\n\t대출 납부 아이디:\t %d\n\t원금: \t*%s원*\n\t이자: \t*%s원*\n\t납부 총액: \t*%s원*";
 
     private final BobWorksOAuth2Properties properties;
 
@@ -96,7 +96,7 @@ public class NotificationScheduler {
                 loan.getRepaymentHistories().stream()
                     .filter(LoanRepaymentHistory::getIsRepaid)
                     .max(Comparator.comparing(LoanRepaymentHistory::getRepaymentDate))
-                    .map(LoanRepaymentHistory::getRepaymentDate)
+                    .map(item -> item.getRepaymentDate().toLocalDate())
                     .orElse(loan.getStartDate());
 
             LoanRepaymentHistory createdRepayment = loan.createRepayment(defaultPaymentBalance, now, prevRepaymentDate);

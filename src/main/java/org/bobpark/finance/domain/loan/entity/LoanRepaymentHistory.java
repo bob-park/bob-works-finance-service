@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.*;
 import static org.apache.commons.lang3.ObjectUtils.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,11 +45,11 @@ public class LoanRepaymentHistory extends BaseTimeEntity {
 
     private Integer round;
     private Boolean isRepaid;
-    private LocalDate repaymentDate;
+    private LocalDateTime repaymentDate;
 
     @Builder
     private LoanRepaymentHistory(Long id, Long principal, Long interest, Integer round, Boolean isRepaid,
-        LocalDate repaymentDate) {
+        LocalDateTime repaymentDate) {
 
         checkArgument(isNotEmpty(principal), "principal must be provided.");
         checkArgument(isNotEmpty(interest), "interest must be provided.");
@@ -72,7 +73,7 @@ public class LoanRepaymentHistory extends BaseTimeEntity {
         getLoan().updateEndingBalance(getLoan().getEndingBalance() - getPrincipal());
         getLoan().updateRepaymentCount(getLoan().getRepaymentCount() + 1);
 
-        this.repaymentDate = LocalDate.now();
+        this.repaymentDate = LocalDateTime.now();
     }
 
 }
