@@ -13,6 +13,7 @@ create table loans
     total_balance      bigint                  not null,
     repayment_count    bigint    default 0     not null,
     ending_balance     bigint    default 0     not null,
+    status             varchar(50)             not null,
     created_date       timestamp default now() not null,
     created_by         varchar(50)             not null,
     last_modified_date timestamp,

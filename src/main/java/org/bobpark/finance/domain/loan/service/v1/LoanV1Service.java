@@ -14,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Preconditions;
-
 import org.bobpark.core.exception.NotFoundException;
 import org.bobpark.core.model.common.Id;
 import org.bobpark.finance.common.entity.BaseTimeEntity;
@@ -100,7 +98,6 @@ public class LoanV1Service implements LoanService {
         log.debug("repaid loan... (loanId={})", loan.getId());
 
         return of(loan);
-
     }
 
     private UserResponse getUser(String userId) {

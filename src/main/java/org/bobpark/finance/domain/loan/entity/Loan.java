@@ -30,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.formula.functions.FinanceLib;
 
 import org.bobpark.finance.common.entity.BaseEntity;
+import org.bobpark.finance.domain.loan.type.LoanStatus;
 import org.bobpark.finance.domain.loan.type.RepaymentType;
 
 @ToString
@@ -59,6 +60,9 @@ public class Loan extends BaseEntity {
     private Long repaymentCount;
     private Long endingBalance;
 
+    @Enumerated(EnumType.STRING)
+    private LoanStatus status;
+
     @Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "loan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LoanRepaymentHistory> repaymentHistories = new ArrayList<>();
@@ -66,7 +70,7 @@ public class Loan extends BaseEntity {
     @Builder
     private Loan(Long id, Long userId, String name, String description, LocalDate startDate, LocalDate endDate,
         Integer repaymentDate, Double interestRate, RepaymentType repaymentType, Long totalBalance,
-        Long repaymentCount, Long endingBalance) {
+        Long repaymentCount, Long endingBalance, LoanStatus status) {
 
         checkArgument(isNotEmpty(userId), "userId must be provided.");
         checkArgument(StringUtils.isNotBlank(name), "name must be provided.");
@@ -92,6 +96,7 @@ public class Loan extends BaseEntity {
         this.totalBalance = totalBalance;
         this.repaymentCount = defaultIfNull(repaymentCount, 0L);
         this.endingBalance = defaultIfNull(endingBalance, totalBalance);
+        this.status = defaultIfNull(status, LoanStatus.PROCEEDING);
     }
 
     public void repay(LocalDate now, LocalDate prevRepaymentDate) {
@@ -101,9 +106,8 @@ public class Loan extends BaseEntity {
     /**
      * 대출 상환 메서드
      *
-     *
-     * @param repayment 상환 급액 - type 이 CUSTOM 인 경우에만 적용
-     * @param now 상환 날짜
+     * @param repayment         상환 급액 - type 이 CUSTOM 인 경우에만 적용
+     * @param now               상환 날짜
      * @param prevRepaymentDate 이전 상환 날짜
      */
     public void repay(long repayment, LocalDate now, LocalDate prevRepaymentDate) {

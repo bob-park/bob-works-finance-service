@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import org.bobpark.finance.domain.role.feign.model.RoleResponse;
 
-@FeignClient(name = "authorization-service")
+@FeignClient(name = "authorization-service", contextId = "user-role-service")
 public interface RoleClient {
 
     @GetMapping(path = "role")

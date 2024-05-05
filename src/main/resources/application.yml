@@ -54,6 +54,7 @@ spring:
         jwt:
           issuer-uri: ${issuer_host}
 
+
 # eureka
 eureka:
   instance:

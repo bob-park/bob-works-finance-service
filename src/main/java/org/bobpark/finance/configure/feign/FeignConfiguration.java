@@ -19,6 +19,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.google.common.collect.Maps;
 
 import feign.RequestInterceptor;
+import io.micrometer.common.util.StringUtils;
+
+import org.bobpark.finance.common.auth.BobWorksAuthenticationContextHolder;
 
 @Configuration
 public class FeignConfiguration {
@@ -38,16 +41,22 @@ public class FeignConfiguration {
 
         Map<String, Collection<String>> headers = Maps.newHashMap();
 
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
 
         if (requestAttributes != null) {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
 
             headers.put(X_FORWARDED_FOR, Collections.singletonList(request.getHeader(X_FORWARDED_FOR)));
             headers.put(AUTHORIZATION, Collections.singletonList(request.getHeader(AUTHORIZATION)));
+        } else {
+            String accessToken = BobWorksAuthenticationContextHolder.getContext();
+
+            if (StringUtils.isNotBlank(accessToken)) {
+                headers.put(AUTHORIZATION, Collections.singletonList(String.format("Bearer %s", accessToken)));
+            }
         }
 
-        headers.put(CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_JSON_VALUE));
+        // headers.put(CONTENT_TYPE, Collections.singletonList(MediaType.APPLICATION_JSON_VALUE));
         headers.put(ACCEPT, Collections.singletonList(MediaType.APPLICATION_JSON_VALUE));
 
         return headers;
