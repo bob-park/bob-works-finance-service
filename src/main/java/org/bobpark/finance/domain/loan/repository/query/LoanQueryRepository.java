@@ -10,4 +10,6 @@ public interface LoanQueryRepository {
 
     List<Loan> getAllByProceeding();
 
+    List<Loan> getByUserId(long userId);
+
 }

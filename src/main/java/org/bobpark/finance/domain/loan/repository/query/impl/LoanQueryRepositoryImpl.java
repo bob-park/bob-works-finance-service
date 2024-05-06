@@ -37,4 +37,13 @@ public class LoanQueryRepositoryImpl implements LoanQueryRepository {
             .orderBy(loan.startDate.asc())
             .fetch();
     }
+
+    @Override
+    public List<Loan> getByUserId(long userId) {
+        return query.selectFrom(loan)
+            .where(
+                loan.userId.eq(userId))
+            .orderBy(loan.startDate.desc())
+            .fetch();
+    }
 }

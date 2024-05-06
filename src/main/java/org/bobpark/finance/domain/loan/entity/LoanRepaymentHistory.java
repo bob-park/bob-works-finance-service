@@ -3,7 +3,6 @@ package org.bobpark.finance.domain.loan.entity;
 import static com.google.common.base.Preconditions.*;
 import static org.apache.commons.lang3.ObjectUtils.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
@@ -73,6 +72,7 @@ public class LoanRepaymentHistory extends BaseTimeEntity {
         getLoan().updateEndingBalance(getLoan().getEndingBalance() - getPrincipal());
         getLoan().updateRepaymentCount(getLoan().getRepaymentCount() + 1);
 
+        this.isRepaid = true;
         this.repaymentDate = LocalDateTime.now();
     }
 
