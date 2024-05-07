@@ -28,8 +28,8 @@ class LoanTest {
                 .endingBalance(100_000_000L)
                 .build();
 
-        LocalDate now = LocalDate.of(2024, 4, 8);
-        LocalDate prevDate = LocalDate.of(2024, 3, 8);
+        LocalDate now = LocalDate.of(2023, 12, 8);
+        LocalDate prevDate = LocalDate.of(2023, 11, 8);
 
         loan.createRepayment(0, now, prevDate);
 
