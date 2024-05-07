@@ -117,7 +117,6 @@ public class Loan extends BaseEntity {
         long interest = 0;
 
         long totalMonth = Math.abs(ChronoUnit.MONTHS.between(getStartDate(), getEndDate()));
-        long days = Math.abs(ChronoUnit.DAYS.between(now, prevRepaymentDate));
 
         switch (getRepaymentType()) {
 
@@ -138,26 +137,19 @@ public class Loan extends BaseEntity {
 
             case EQUAL_PRINCIPAL_PAYMENT -> {
                 // 원금 균등 상환
-
                 principal = Math.round(getTotalBalance() / (double)totalMonth);
-
-                long totalInterest =
-                    Math.round((getTotalBalance() - (principal * getRepaymentCount()))
-                        * getInterestRate());
-
-                interest = Math.round(totalInterest * (days / (double)365));
+                interest = calculateInterest(now, prevRepaymentDate);
             }
 
             case BALLOON_PAYMENT -> {
                 // 만기 일시
-                interest = Math.round(
-                    (getTotalBalance() * getInterestRate()) * (days / (double)365));
+                interest = calculateInterest(now, prevRepaymentDate);
 
             }
 
             default -> {
                 // custom
-                interest = Math.round((getEndingBalance() * getInterestRate()) * (days / (double)365));
+                interest = calculateInterest(now, prevRepaymentDate);
                 principal = repayment - interest;
             }
         }
@@ -182,6 +174,35 @@ public class Loan extends BaseEntity {
 
     public void updateRepaymentCount(long repaymentCount) {
         this.repaymentCount = repaymentCount;
+    }
+
+    private long calculateInterest(LocalDate now, LocalDate prevRepaymentDate) {
+
+        double yearInterest = getEndingBalance() * getInterestRate();
+
+        long totalNowYearDays = LocalDate.of(now.getYear(), 12, 31).getDayOfYear();
+        long totalPrevYearDays = LocalDate.of(prevRepaymentDate.getYear(), 12, 31).getDayOfYear();
+
+        double interestOfNowYearDays = yearInterest / totalNowYearDays;
+        double interestOfPrevYearDays = yearInterest / totalPrevYearDays;
+
+        long nowDays = Math.abs(ChronoUnit.DAYS.between(LocalDate.of(now.getYear(), now.getMonthValue(), 1), now));
+
+        LocalDate nextPrevDate = prevRepaymentDate.plusMonths(1);
+        long prevDays =
+            Math.abs(
+                ChronoUnit.DAYS.between(
+                    LocalDate.of(
+                        prevRepaymentDate.getYear(),
+                        prevRepaymentDate.getMonthValue(),
+                        prevRepaymentDate.getDayOfMonth()),
+                    LocalDate.of(
+                        nextPrevDate.getYear(),
+                        nextPrevDate.getMonthValue(),
+                        1)));
+
+        return (long)(((interestOfNowYearDays * nowDays) + (interestOfPrevYearDays * prevDays)) / 10) * 10;
+
     }
 
 }

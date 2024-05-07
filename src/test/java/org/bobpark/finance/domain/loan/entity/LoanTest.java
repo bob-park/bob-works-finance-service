@@ -17,19 +17,19 @@ class LoanTest {
                 .userId(1L)
                 .name("test")
                 .startDate(LocalDate.now())
-                .endDate(LocalDate.now().plusYears(10))
-                .repaymentDate(1)
-                .repaymentType(RepaymentType.LEVEL_PAYMENT)
-                // .repaymentType(RepaymentType.BALLOON_PAYMENT)
+                .endDate(LocalDate.now().plusYears(4))
+                .repaymentDate(8)
+                // .repaymentType(RepaymentType.LEVEL_PAYMENT)
+                .repaymentType(RepaymentType.BALLOON_PAYMENT)
                 // .repaymentType(RepaymentType.EQUAL_PRINCIPAL_PAYMENT)
                 .repaymentCount(1L)
-                .interestRate(0.046)
-                .totalBalance(200_000_000L)
-                .endingBalance(198_684_244L)
+                .interestRate(0.016)
+                .totalBalance(100_000_000L)
+                .endingBalance(100_000_000L)
                 .build();
 
-        LocalDate now = LocalDate.of(2024, 4, 1);
-        LocalDate prevDate = LocalDate.of(2024, 3, 1);
+        LocalDate now = LocalDate.of(2024, 4, 8);
+        LocalDate prevDate = LocalDate.of(2024, 3, 8);
 
         loan.createRepayment(0, now, prevDate);
 
