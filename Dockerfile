@@ -5,4 +5,4 @@ COPY ${JAR_FILE} application.jar
 
 ENV TZ=Asia/Seoul
 
-ENTRYPOINT ["java", "-Xmx128m", "-jar", "application.jar"]
+ENTRYPOINT ["java", "-server", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-jar", "application.jar"]
